@@ -2497,3 +2497,20 @@ video.hero-fondo::-webkit-media-controls-panel {
 video.hero-fondo {
   pointer-events: none;
 }
+
+/* Foto de las olas: se ve si el video no arranca (ahorro de batería en iPhone) */
+.hero-foto {
+  position: absolute;
+  inset: 0;
+  z-index: -4;
+  background: url("assets/agua-mar-poster.jpg") center / cover no-repeat;
+}
+
+video.hero-fondo {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+video.hero-fondo.reproduciendo {
+  opacity: 1;
+}

@@ -862,3 +862,16 @@ if (
     }, { once: true, passive: true });
   });
 })();
+
+
+/* Mostrar el video solo cuando realmente está reproduciendo */
+(() => {
+  const video = document.querySelector('video.hero-fondo');
+  if (!video) return;
+  const mostrar = () => video.classList.add('reproduciendo');
+  const ocultar = () => video.classList.remove('reproduciendo');
+  video.addEventListener('playing', mostrar);
+  video.addEventListener('pause', ocultar);
+  video.addEventListener('waiting', () => {});
+  if (!video.paused && video.readyState > 2) mostrar();
+})();
