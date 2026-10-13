@@ -2483,3 +2483,17 @@ textarea {
     flex: 0 0 270px;
   }
 }
+
+/* Video de fondo: sin botón de play en iPhone */
+video.hero-fondo::-webkit-media-controls,
+video.hero-fondo::-webkit-media-controls-start-playback-button,
+video.hero-fondo::-webkit-media-controls-overlay-play-button,
+video.hero-fondo::-webkit-media-controls-panel {
+  display: none !important;
+  -webkit-appearance: none;
+  opacity: 0;
+}
+
+video.hero-fondo {
+  pointer-events: none;
+}

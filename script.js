@@ -784,3 +784,81 @@ if (
       });
     });
 })();
+
+
+// Contador animado de la trayectoria (41 años)
+(() => {
+  const contadores = document.querySelectorAll(".contador[data-hasta]");
+  if (!contadores.length) return;
+
+  const sinMovimiento = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  );
+
+  function animar(el) {
+    const meta = Number(el.dataset.hasta) || 0;
+
+    if (sinMovimiento.matches) {
+      el.textContent = String(meta);
+      return;
+    }
+
+    const duracion = 1800;
+    const inicio = performance.now();
+
+    function paso(ahora) {
+      const avance = Math.min(1, (ahora - inicio) / duracion);
+      const suave = 1 - Math.pow(1 - avance, 3);
+      el.textContent = String(Math.round(meta * suave));
+      if (avance < 1) requestAnimationFrame(paso);
+    }
+
+    el.textContent = "0";
+    requestAnimationFrame(paso);
+  }
+
+  if (!("IntersectionObserver" in window)) return;
+
+  const observador = new IntersectionObserver(
+    (entradas) => {
+      entradas.forEach((entrada) => {
+        if (entrada.isIntersecting) {
+          animar(entrada.target);
+          observador.unobserve(entrada.target);
+        }
+      });
+    },
+    { threshold: 0.6 }
+  );
+
+  contadores.forEach((el) => observador.observe(el));
+})();
+
+
+/* Video del hero: forzar reproducción silenciosa (iPhone / navegador de WhatsApp) */
+(() => {
+  const video = document.querySelector('video.hero-fondo');
+  if (!video) return;
+
+  video.muted = true;
+  video.defaultMuted = true;
+  video.setAttribute('muted', '');
+  video.setAttribute('playsinline', '');
+  video.setAttribute('webkit-playsinline', '');
+
+  const reproducir = () => {
+    const promesa = video.play();
+    if (promesa && promesa.catch) promesa.catch(() => {});
+  };
+
+  reproducir();
+  video.addEventListener('loadeddata', reproducir);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) reproducir();
+  });
+  ['touchstart', 'click', 'scroll'].forEach((evento) => {
+    window.addEventListener(evento, () => {
+      if (video.paused) reproducir();
+    }, { once: true, passive: true });
+  });
+})();
