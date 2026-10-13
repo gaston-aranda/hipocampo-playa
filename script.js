@@ -671,3 +671,116 @@ if (
   controles.hidden = tarjetas.length < 2;
   actualizarPosicion();
 })();
+
+// Efectos interactivos: luz de agua, botones imán y tarjetas
+(() => {
+  const sinMovimiento = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+  );
+
+  const conPuntero = window.matchMedia(
+    "(hover: hover) and (pointer: fine)"
+  );
+
+  // Luz de agua sobre el título: sigue al mouse o al dedo
+  const portada = document.querySelector(".hero");
+  const titulo = document.querySelector(".titulo-agua");
+
+  if (portada && titulo) {
+    let cuadro = null;
+    let punto = null;
+
+    function moverLuz() {
+      cuadro = null;
+      if (!punto) return;
+
+      const caja = titulo.getBoundingClientRect();
+      if (!caja.width || !caja.height) return;
+
+      const x = ((punto.x - caja.left) / caja.width) * 100;
+      const y = ((punto.y - caja.top) / caja.height) * 100;
+
+      titulo.style.setProperty(
+        "--lx",
+        `${Math.min(110, Math.max(-10, x)).toFixed(1)}%`
+      );
+
+      titulo.style.setProperty(
+        "--ly",
+        `${Math.min(110, Math.max(-10, y)).toFixed(1)}%`
+      );
+    }
+
+    portada.addEventListener(
+      "pointermove",
+      (evento) => {
+        if (sinMovimiento.matches) return;
+
+        punto = { x: evento.clientX, y: evento.clientY };
+
+        if (cuadro === null) {
+          cuadro = requestAnimationFrame(moverLuz);
+        }
+      },
+      { passive: true }
+    );
+
+    portada.addEventListener("pointerleave", () => {
+      titulo.style.removeProperty("--lx");
+      titulo.style.removeProperty("--ly");
+    });
+  }
+
+  if (!conPuntero.matches) return;
+
+  // Botones con efecto imán
+  document.querySelectorAll(".boton").forEach((boton) => {
+    boton.addEventListener("pointermove", (evento) => {
+      if (sinMovimiento.matches) return;
+
+      const caja = boton.getBoundingClientRect();
+      const dx = evento.clientX - (caja.left + caja.width / 2);
+      const dy = evento.clientY - (caja.top + caja.height / 2);
+
+      boton.style.setProperty(
+        "--bx",
+        `${((dx / caja.width) * 10).toFixed(1)}px`
+      );
+
+      boton.style.setProperty(
+        "--by",
+        `${((dy / caja.height) * 8).toFixed(1)}px`
+      );
+    });
+
+    boton.addEventListener("pointerleave", () => {
+      boton.style.removeProperty("--bx");
+      boton.style.removeProperty("--by");
+    });
+  });
+
+  // Tarjetas de propuestas con inclinación suave
+  document
+    .querySelectorAll(".grid-tarjetas .tarjeta")
+    .forEach((tarjeta) => {
+      tarjeta.addEventListener("pointermove", (evento) => {
+        if (sinMovimiento.matches) return;
+
+        const caja = tarjeta.getBoundingClientRect();
+        const px = (evento.clientX - caja.left) / caja.width;
+        const py = (evento.clientY - caja.top) / caja.height;
+
+        tarjeta.classList.add("inclinada");
+        tarjeta.style.setProperty("--ry", `${((px - 0.5) * 8).toFixed(2)}deg`);
+        tarjeta.style.setProperty("--rx", `${((0.5 - py) * 8).toFixed(2)}deg`);
+        tarjeta.style.setProperty("--gx", `${(px * 100).toFixed(1)}%`);
+        tarjeta.style.setProperty("--gy", `${(py * 100).toFixed(1)}%`);
+      });
+
+      tarjeta.addEventListener("pointerleave", () => {
+        tarjeta.classList.remove("inclinada");
+        tarjeta.style.removeProperty("--rx");
+        tarjeta.style.removeProperty("--ry");
+      });
+    });
+})();
