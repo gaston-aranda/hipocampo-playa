@@ -803,12 +803,12 @@ if (
       return;
     }
 
-    const duracion = 1800;
+    const duracion = 4500;
     const inicio = performance.now();
 
     function paso(ahora) {
       const avance = Math.min(1, (ahora - inicio) / duracion);
-      const suave = 1 - Math.pow(1 - avance, 3);
+      const suave = 1 - Math.pow(1 - avance, 2);
       el.textContent = String(Math.round(meta * suave));
       if (avance < 1) requestAnimationFrame(paso);
     }
